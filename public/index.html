@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1>猜拳遊戲</h1>
+    <div id="login">
+        <input type="text" id="username" placeholder="Enter your name">
+        <button onclick="joinGame()">Join Game</button>
+    </div>
+    <div id="game">
+        <div id="players"></div>
+        <button onclick="makeChoice('Rock')">剪刀</button>
+        <button onclick="makeChoice('Paper')">石頭</button>
+        <button onclick="makeChoice('Scissors')">布</button>
+        <div id="result"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function joinGame() {
+            const username = document.getElementById('username').value;
+            if (username) {
+                socket.emit('joinGame', username);
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+            }
+        }
+
+        socket.on('playersUpdate', (players) => {
+            const playersDiv = document.getElementById('players');
+            playersDiv.innerHTML = 'Players:<br>';
+            for (let id in players) {
+                playersDiv.innerHTML += players[id].username + '<br>';
+            }
+        });
+
+        function makeChoice(choice) {
+            socket.emit('makeChoice', choice);
+        }
+
+        socket.on('gameResult', (result) => {
+            document.getElementById('result').innerText = result;
+        });
+    </script>
+</body>
+</html>
